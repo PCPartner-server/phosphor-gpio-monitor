@@ -46,6 +46,7 @@ class Presence : public Evdev
     Presence& operator=(const Presence&) = delete;
     Presence(Presence&&) = delete;
     Presence& operator=(Presence&&) = delete;
+    bool iPresence = false;
 
     /** @brief Constructs Presence object.
      *

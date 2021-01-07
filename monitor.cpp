@@ -35,7 +35,7 @@ using namespace phosphor::logging;
 // Callback handler when there is an activity on the FD
 int Monitor::processEvents(sd_event_source*, int, uint32_t, void* userData)
 {
-    //log<level::INFO>("GPIO line altered");
+    log<level::DEBUG>("GPIO line altered");
     auto monitor = static_cast<Monitor*>(userData);
 
     monitor->analyzeEvent();

@@ -76,7 +76,7 @@ void Presence::determinePresence()
     {
         present = true;
     }
-
+    iPresence = present;
     updateInventory(present);
 }
 
@@ -126,8 +126,11 @@ void Presence::analyzeEvent()
                 {
                     present = true;
                 }
-                updateInventory(present);
-                bindOrUnbindDrivers(present);
+                if(iPresence != present){
+                    updateInventory(present);
+                    bindOrUnbindDrivers(present);
+                    iPresence = present;
+                }
             }
         }
     }
@@ -202,22 +205,26 @@ void Presence::bindOrUnbindDrivers(bool present)
 
         file.exceptions(std::ofstream::failbit | std::ofstream::badbit |
                         std::ofstream::eofbit);
-
-        try
-        {
-            file.open(path);
-            file << device;
-            file.close();
-        }
-        catch (std::exception& e)
-        {
-            auto err = errno;
-
-            log<level::ERR>("Failed binding or unbinding a device "
-                            "after a card was removed or added",
-                            entry("PATH=%s", path.c_str()),
-                            entry("DEVICE=%s", device.c_str()),
-                            entry("ERRNO=%d", err));
+        int i,iMax=3;
+        for(i=0;i<iMax;i++){
+            try
+            {
+                file.open(path);
+                file << device;
+                file.close();
+                i=iMax;
+            }
+            catch (std::exception& e)
+            {
+                auto err = errno;
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                log<level::ERR>("Failed binding or unbinding a device "
+                                "after a card was removed or added",
+                                entry("PATH=%s", path.c_str()),
+                                entry("DEVICE=%s", device.c_str()),
+                                entry("Retry=%d", i),
+                                entry("ERRNO=%d", err));
+            }
         }
     }
 }
