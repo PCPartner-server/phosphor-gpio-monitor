@@ -126,8 +126,8 @@ void Presence::analyzeEvent()
                 {
                     present = true;
                 }
+                updateInventory(present);
                 if(iPresence != present){
-                    updateInventory(present);
                     bindOrUnbindDrivers(present);
                     iPresence = present;
                 }
