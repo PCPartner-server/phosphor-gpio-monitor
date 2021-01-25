@@ -126,8 +126,8 @@ void Presence::analyzeEvent()
                 {
                     present = true;
                 }
-                updateInventory(present);
                 if(iPresence != present){
+                    updateInventory(present);
                     bindOrUnbindDrivers(present);
                     iPresence = present;
                 }
@@ -161,7 +161,7 @@ void Presence::updateInventory(bool present)
 {
     ObjectMap invObj = getObjectMap(present);
 
-    log<level::INFO>("Updating inventory present property",
+    log<level::DEBUG>("Updating inventory present property",
                      entry("PRESENT=%d", present),
                      entry("PATH=%s", inventory.c_str()));
 
