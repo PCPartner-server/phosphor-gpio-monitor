@@ -1,5 +1,7 @@
 [Unit]
 Description=Phosphor GPIO %I monitor
+Wants=mapper-wait@-xyz-openbmc_project-inventory.service
+After=mapper-wait@-xyz-openbmc_project-inventory.service
 
 [Service]
 Restart=always
