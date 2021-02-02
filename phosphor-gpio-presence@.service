@@ -1,13 +1,16 @@
 [Unit]
 Description=Phosphor GPIO %I Presence
-Wants=mapper-wait@-xyz-openbmc_project-inventory.service
-After=mapper-wait@-xyz-openbmc_project-inventory.service
+#Wants=mapper-wait@-xyz-openbmc_project-inventory.service
+#After=mapper-wait@-xyz-openbmc_project-inventory.service
+Wants=mapper-wait@-xyz-openbmc_project-state-bmc0.service
+After=mapper-wait@-xyz-openbmc_project-state-bmc0.service
 ConditionPathExists=/etc/default/obmc/gpio/phosphor-power-supply-%i.conf
 
 [Service]
 Restart=on-failure
 EnvironmentFile=/etc/default/obmc/gpio/phosphor-power-supply-%i.conf
 ExecStart=/usr/bin/phosphor-gpio-presence --path=${DEVPATH} --inventory=${INVENTORY} --key=${KEY} --name=${NAME} --drivers=${DRIVERS} --extra-ifaces=${EXTRA_IFACES}
+SyslogIdentifier=phosphor-gpio-presence
 
 [Install]
 RequiredBy=multi-user.target
