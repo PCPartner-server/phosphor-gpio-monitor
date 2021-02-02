@@ -97,6 +97,7 @@ class Presence : public Evdev
      * @param[in] present - What the present property should be set to.
      */
     void updateInventory(bool present);
+    void readEEPROM(const std::string&);
 
     /**
      * @brief Construct the inventory object map for the inventory item.

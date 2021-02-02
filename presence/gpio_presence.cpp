@@ -27,6 +27,11 @@ constexpr auto MAPPER_BUSNAME = "xyz.openbmc_project.ObjectMapper";
 constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
 constexpr auto MAPPER_INTERFACE = "xyz.openbmc_project.ObjectMapper";
 
+constexpr char SYSTEMD_BUSNAME[] = "org.freedesktop.systemd1";
+constexpr char SYSTEMD_PATH[] = "/org/freedesktop/systemd1";
+constexpr char SYSTEMD_INTERFACE[] = "org.freedesktop.systemd1.Manager";
+constexpr char OBMCREADEEPROM_UNITNAME[] = "obmc-read-eeprom";
+
 std::string getService(const std::string& path, const std::string& interface,
                        sdbusplus::bus::bus& bus)
 {
@@ -157,6 +162,29 @@ Presence::ObjectMap Presence::getObjectMap(bool present)
     return invObj;
 }
 
+void Presence::readEEPROM(const std::string& unit)
+{
+    std::string unit_name;// = unit.substr(1,unit.length()-1);
+    unit_name = OBMCREADEEPROM_UNITNAME;
+    unit_name += "@";
+    unit_name += unit.substr(1,unit.length()-1);
+    std::replace( unit_name.begin(), unit_name.end(), '/', '-');
+    unit_name += ".service";
+    try
+    {
+        auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                          SYSTEMD_INTERFACE, "RestartUnit");
+        method.append(unit_name.c_str(), "replace");
+        bus.call_noreply(method);
+    }
+    catch (const sdbusplus::exception::SdBusError& ex)
+    {
+        log<level::ERR>("Failed to restart service", entry("ERR=%s", ex.what()),
+                        entry("UNIT=%s", unit_name.c_str()));
+        elog<InternalFailure>();
+    }
+}
+
 void Presence::updateInventory(bool present)
 {
     ObjectMap invObj = getObjectMap(present);
@@ -177,6 +205,7 @@ void Presence::updateInventory(bool present)
         log<level::ERR>("Error in inventory manager call to update inventory");
         elog<InternalFailure>();
     }
+    readEEPROM(inventory.c_str());
 }
 
 void Presence::bindOrUnbindDrivers(bool present)
